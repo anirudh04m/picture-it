@@ -44,6 +44,7 @@ const GuessLocation = () => {
 
   const handleGuessChange = (e) => {
     const { name, value } = e.target;
+    // Allow normal typing, just trim whitespace for display
     setGuess(prev => ({
       ...prev,
       [name]: value
@@ -89,6 +90,23 @@ const GuessLocation = () => {
     }
   };
 
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case 'easy':
+        return 'text-green-600 bg-green-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'hard':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const capitalizeFirstLetter = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -102,10 +120,18 @@ const GuessLocation = () => {
       <div className="text-center py-16">
         <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">No Photos Available</h2>
-        <p className="text-gray-600 mb-6">There are no photos to guess right now. Check back later!</p>
-        <button onClick={() => router.push('/upload')} className="btn-primary">
-          Upload a Photo
-        </button>
+        <p className="text-gray-600 mb-6">
+          You've either guessed all available photos or there are no new photos to guess right now. 
+          Check back later for new uploads!
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button onClick={() => router.push('/upload')} className="btn-primary">
+            Upload a Photo
+          </button>
+          <button onClick={() => router.push('/leaderboard')} className="btn-secondary">
+            View Leaderboard
+          </button>
+        </div>
       </div>
     );
   }
@@ -153,7 +179,9 @@ const GuessLocation = () => {
               <p className="text-gray-600 mb-4">{currentPhoto.description}</p>
             )}
             <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>Difficulty: {currentPhoto.difficulty}</span>
+              <span className={getDifficultyColor(currentPhoto.difficulty)}>
+                {capitalizeFirstLetter(currentPhoto.difficulty)}
+              </span>
               <span>{currentPhoto.points} points</span>
             </div>
           </div>
@@ -170,6 +198,23 @@ const GuessLocation = () => {
                 <p className="text-gray-600 mb-6">
                   Enter the country and city where you think this photo was taken.
                 </p>
+                
+                {/* Scoring Rules */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold text-blue-900 mb-2">Scoring System:</h4>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p><strong>Base Points:</strong> {currentPhoto.points} points for correct guess</p>
+                    <p><strong>Time Bonus:</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>• Under 30 seconds: +5 bonus points</li>
+                      <li>• 30-60 seconds: +3 bonus points</li>
+                      <li>• Over 60 seconds: +1 bonus point</li>
+                    </ul>
+                    <p className="mt-2 text-xs">
+                      <strong>Total possible:</strong> {currentPhoto.points + 5} points for a quick correct guess!
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -185,7 +230,11 @@ const GuessLocation = () => {
                   placeholder="e.g., United States"
                   value={guess.country}
                   onChange={handleGuessChange}
+                  autoComplete="off"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Case doesn't matter - you can type in any format
+                </p>
               </div>
 
               <div>
@@ -201,7 +250,11 @@ const GuessLocation = () => {
                   placeholder="e.g., New York"
                   value={guess.city}
                   onChange={handleGuessChange}
+                  autoComplete="off"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Case doesn't matter - you can type in any format
+                </p>
               </div>
 
               <button

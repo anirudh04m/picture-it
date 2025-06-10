@@ -29,6 +29,13 @@ const upload = multer({
   }
 });
 
+// Points mapping based on difficulty
+const difficultyPoints = {
+  easy: 5,
+  medium: 10,
+  hard: 15
+};
+
 // @route   POST /api/photos/upload
 // @desc    Upload a new photo
 // @access  Private
@@ -63,6 +70,10 @@ router.post('/upload', auth, upload.single('image'), [
       ).end(req.file.buffer);
     });
 
+    // Determine points based on difficulty
+    const difficulty = req.body.difficulty || 'medium';
+    const points = difficultyPoints[difficulty] || 10;
+
     const photo = new Photo({
       user: req.user.id,
       imageUrl: result.secure_url,
@@ -74,8 +85,8 @@ router.post('/upload', auth, upload.single('image'), [
         city: req.body.actualLocation.city,
         coordinates: req.body.actualLocation.coordinates || {}
       },
-      difficulty: req.body.difficulty || 'medium',
-      points: req.body.points || 10
+      difficulty: difficulty,
+      points: points
     });
 
     await photo.save();
@@ -98,10 +109,17 @@ router.post('/upload', auth, upload.single('image'), [
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
+    // Get photos that the user has already guessed
+    const Guess = require('../models/Guess');
+    const userGuesses = await Guess.find({ user: req.user.id }).select('photo');
+    const guessedPhotoIds = userGuesses.map(guess => guess.photo);
+
+    // Find photos that are active, not expired, not user's own, and not already guessed
     const photos = await Photo.find({
       isActive: true,
       expiresAt: { $gt: new Date() },
-      user: { $ne: req.user.id } // Exclude user's own photos
+      user: { $ne: req.user.id }, // Exclude user's own photos
+      _id: { $nin: guessedPhotoIds } // Exclude photos user has already guessed
     })
     .populate('user', 'username avatar')
     .select('-actualLocation') // Don't send actual location to client
@@ -169,7 +187,7 @@ router.delete('/:id', auth, async (req, res) => {
     // Delete from Cloudinary
     await cloudinary.uploader.destroy(photo.publicId);
 
-    await photo.remove();
+    await photo.deleteOne();
 
     // Update user's photos uploaded count
     await require('../models/User').findByIdAndUpdate(

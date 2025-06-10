@@ -1,12 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 import { Camera, MapPin, Trophy, Users, Zap, Upload } from 'lucide-react';
 
 const Home = () => {
   const { user } = useAuth();
+  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
+
+  const loadUserStats = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/api/users/stats');
+      setUserStats(response.data);
+    } catch (error) {
+      console.error('Error loading user stats:', error);
+      // If stats fail to load, use user object data as fallback
+      setUserStats({
+        totalPoints: user.points || 0,
+        correctGuesses: user.correctGuesses || 0,
+        totalGuesses: user.totalGuesses || 0,
+        photosUploaded: user.photosUploaded || 0
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const features = [
     {
@@ -29,6 +57,12 @@ const Home = () => {
       title: 'Join Community',
       description: 'Connect with fellow travelers and geography enthusiasts from around the world.'
     }
+  ];
+
+  const scoringRules = [
+    { difficulty: 'Easy', basePoints: 5, totalPossible: 10 },
+    { difficulty: 'Medium', basePoints: 10, totalPossible: 15 },
+    { difficulty: 'Hard', basePoints: 15, totalPossible: 20 }
   ];
 
   return (
@@ -73,19 +107,27 @@ const Home = () => {
       {user && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
           <div className="card text-center">
-            <div className="text-2xl font-bold text-primary-600 mb-2">{user.points}</div>
+            <div className="text-2xl font-bold text-primary-600 mb-2">
+              {loading ? '...' : (userStats?.totalPoints || user.points || 0)}
+            </div>
             <div className="text-gray-600">Total Points</div>
           </div>
           <div className="card text-center">
-            <div className="text-2xl font-bold text-green-600 mb-2">{user.correctGuesses}</div>
+            <div className="text-2xl font-bold text-green-600 mb-2">
+              {loading ? '...' : (userStats?.correctGuesses || user.correctGuesses || 0)}
+            </div>
             <div className="text-gray-600">Correct Guesses</div>
           </div>
           <div className="card text-center">
-            <div className="text-2xl font-bold text-blue-600 mb-2">{user.totalGuesses}</div>
+            <div className="text-2xl font-bold text-blue-600 mb-2">
+              {loading ? '...' : (userStats?.totalGuesses || user.totalGuesses || 0)}
+            </div>
             <div className="text-gray-600">Total Guesses</div>
           </div>
           <div className="card text-center">
-            <div className="text-2xl font-bold text-purple-600 mb-2">{user.photosUploaded}</div>
+            <div className="text-2xl font-bold text-purple-600 mb-2">
+              {loading ? '...' : (userStats?.photosUploaded || user.photosUploaded || 0)}
+            </div>
             <div className="text-gray-600">Photos Uploaded</div>
           </div>
         </div>
@@ -110,6 +152,56 @@ const Home = () => {
               </p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Scoring System Section */}
+      <div className="mb-16">
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          Scoring System
+        </h2>
+        <div className="max-w-4xl mx-auto">
+          <div className="card">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                How Points Work
+              </h3>
+              <p className="text-gray-600">
+                Earn points for correct guesses with time-based bonuses!
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {scoringRules.map((rule, index) => (
+                <div key={index} className="text-center p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">{rule.difficulty}</h4>
+                  <div className="text-2xl font-bold text-primary-600 mb-1">{rule.basePoints}</div>
+                  <p className="text-sm text-gray-600 mb-2">base points</p>
+                  <div className="text-sm text-green-600">
+                    Up to {rule.totalPossible} with time bonus!
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">Time Bonus Rules:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600">+5</div>
+                  <p>Under 30 seconds</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-yellow-600">+3</div>
+                  <p>30-60 seconds</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-600">+1</div>
+                  <p>Over 60 seconds</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

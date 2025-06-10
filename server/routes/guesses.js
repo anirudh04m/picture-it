@@ -49,10 +49,14 @@ router.post('/', auth, [
       return res.status(400).json({ message: 'You cannot guess your own photo' });
     }
 
-    // Determine if guess is correct
+    // Determine if guess is correct (case insensitive and trim whitespace)
+    const normalizeLocation = (location) => {
+      return location.toLowerCase().trim().replace(/\s+/g, ' ');
+    };
+
     const isCorrect = 
-      guessedLocation.country.toLowerCase() === photo.actualLocation.country.toLowerCase() &&
-      guessedLocation.city.toLowerCase() === photo.actualLocation.city.toLowerCase();
+      normalizeLocation(guessedLocation.country) === normalizeLocation(photo.actualLocation.country) &&
+      normalizeLocation(guessedLocation.city) === normalizeLocation(photo.actualLocation.city);
 
     // Calculate points based on difficulty and time
     let pointsEarned = 0;

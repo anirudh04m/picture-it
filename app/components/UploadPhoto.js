@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Upload, MapPin, Camera, X } from 'lucide-react';
+import { Upload, MapPin, Camera, X, Award } from 'lucide-react';
 
 const UploadPhoto = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +22,21 @@ const UploadPhoto = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Points mapping based on difficulty
+  const difficultyPoints = {
+    easy: 5,
+    medium: 10,
+    hard: 15
+  };
+
+  // Update points when difficulty changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      points: difficultyPoints[prev.difficulty]
+    }));
+  }, [formData.difficulty]);
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -106,6 +121,23 @@ const UploadPhoto = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case 'easy':
+        return 'text-green-600 bg-green-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'hard':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const capitalizeFirstLetter = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   return (
@@ -235,38 +267,38 @@ const UploadPhoto = () => {
             </div>
           </div>
 
-          {/* Difficulty and Points */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
-                Difficulty
-              </label>
-              <select
-                id="difficulty"
-                name="difficulty"
-                className="input-field"
-                value={formData.difficulty}
-                onChange={handleChange}
-              >
-                <option value="easy">Easy (5 points)</option>
-                <option value="medium">Medium (10 points)</option>
-                <option value="hard">Hard (15 points)</option>
-              </select>
+          {/* Difficulty and Points Display */}
+          <div>
+            <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
+              Difficulty Level
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <select
+                  id="difficulty"
+                  name="difficulty"
+                  className="input-field h-12"
+                  value={formData.difficulty}
+                  onChange={handleChange}
+                >
+                  <option value="easy">{capitalizeFirstLetter('easy')}</option>
+                  <option value="medium">{capitalizeFirstLetter('medium')}</option>
+                  <option value="hard">{capitalizeFirstLetter('hard')}</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-300 bg-gray-50 h-12">
+                <Award className="h-5 w-5 text-primary-600" />
+                <span className="text-sm text-gray-600">Points:</span>
+                <span className="font-semibold text-primary-600">{formData.points}</span>
+              </div>
             </div>
-            <div>
-              <label htmlFor="points" className="block text-sm font-medium text-gray-700 mb-2">
-                Points
-              </label>
-              <input
-                type="number"
-                id="points"
-                name="points"
-                min="5"
-                max="20"
-                className="input-field"
-                value={formData.points}
-                onChange={handleChange}
-              />
+            <div className="mt-2 text-sm text-gray-500">
+              <p><strong>{capitalizeFirstLetter('easy')}:</strong> 5 points - Common landmarks, major cities</p>
+              <p><strong>{capitalizeFirstLetter('medium')}:</strong> 10 points - Regional landmarks, smaller cities</p>
+              <p><strong>{capitalizeFirstLetter('hard')}:</strong> 15 points - Hidden gems, remote locations</p>
+              <p className="mt-2 text-xs text-blue-600">
+                💡 Players can earn up to 5 additional points based on how quickly they guess correctly!
+              </p>
             </div>
           </div>
 
