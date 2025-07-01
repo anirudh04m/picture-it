@@ -4,6 +4,22 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// @route   GET /api/users
+// @desc    Get all users (for chat)
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('username avatar')
+      .sort({ username: 1 });
+
+    res.json(users);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // @route   GET /api/users/leaderboard
 // @desc    Get leaderboard
 // @access  Public

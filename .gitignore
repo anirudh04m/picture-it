@@ -4,9 +4,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Next.js
-.next/
-out/
+# Build outputs
 build/
 dist/
 
@@ -63,16 +61,8 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out

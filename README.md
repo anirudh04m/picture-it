@@ -1,85 +1,169 @@
-# Picture It
+# Picture It - Gamified Photo Location Guessing
 
-A gamified social media app where users upload photos and others guess the location to earn points. Built with Next.js, Express, and MongoDB.
+A MERN stack social media application where users upload photos and others guess the location to earn points. Built with React, Redux Toolkit, Express, and MongoDB.
 
 ## Features
-- User authentication (register, login, logout)
-- Upload travel photos with location metadata
-- Guess the location of photos uploaded by others
-- Earn points for correct guesses
-- Leaderboard and user profiles
-- Modern UI with Tailwind CSS
+
+- **User Authentication**: Register, login, and profile management
+- **Photo Upload**: Drag and drop photo uploads with difficulty levels
+- **Location Guessing**: Interactive photo guessing with real-time scoring
+- **Leaderboard**: Competitive rankings with time-based filters
+- **User Profiles**: Personal statistics and profile customization
+- **Responsive Design**: Modern UI with Tailwind CSS
+
+## Tech Stack
+
+### Frontend
+- **React 18** - UI framework
+- **Redux Toolkit** - State management
+- **React Router** - Navigation
+- **Tailwind CSS** - Styling
+- **Lucide React** - Icons
+- **React Dropzone** - File uploads
+- **React Hot Toast** - Notifications
+
+### Backend
+- **Express.js** - Server framework
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **JWT** - Authentication
+- **Multer** - File uploads
+- **bcryptjs** - Password hashing
 
 ## Getting Started
 
-### 1. Install dependencies
-```
-npm install
-```
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
+- npm or yarn
 
-### 2. Configure Environment Variables
-Copy the example config file and update it with your values:
-```bash
-cp config.env.example config.env
-```
+### Installation
 
-Edit `config.env` with your configuration:
-- **MongoDB URI**: Your MongoDB connection string
-- **JWT Secret**: A secure random string for JWT tokens
-- **Cloudinary**: Your Cloudinary credentials (for image uploads)
-- **Ports**: Server and frontend ports
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd picture-it
+   ```
 
-### 3. Start the Development Servers
+2. **Install dependencies**
+   ```bash
+   npm run install-all
+   ```
 
-**Option A: Run both servers together**
-```bash
-npm run dev:full
-```
+3. **Environment Setup**
+   
+   Create a `config.env` file in the root directory:
+   ```env
+   PORT=8080
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret_key
+   API_BASE_URL=http://localhost:8080
+   ```
 
-**Option B: Run servers separately**
-```bash
-# Terminal 1 - Backend
-npm run server
+4. **Start the application**
+   ```bash
+   npm run dev
+   ```
 
-# Terminal 2 - Frontend
-npm run dev
-```
+   This will start both the backend server (port 8080) and React development server (port 3000).
 
-- The frontend will be available at `http://localhost:3000`
-- The backend API will run at `http://localhost:8080`
+### Alternative Commands
 
-### 4. Database Setup
-
-**Local MongoDB (Recommended for development):**
-```bash
-# macOS with Homebrew
-brew install mongodb-community
-brew services start mongodb-community
-```
-
-**MongoDB Atlas (Cloud):**
-1. Create a cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
-2. Add your IP to the whitelist
-3. Update `MONGODB_URI` in `config.env`
+- **Backend only**: `npm run server`
+- **Frontend only**: `npm run client`
+- **Production build**: `npm run build`
 
 ## Project Structure
+
 ```
-/server         # Express backend (API, models, routes)
-/app            # Next.js frontend (pages, components, contexts)
-/public         # Static assets (favicon, images, etc.)
-config.env      # Environment configuration
+picture-it/
+├── client/                 # React frontend
+│   ├── public/            # Static files
+│   │   ├── src/
+│   │   │   ├── components/    # Reusable components
+│   │   │   ├── features/      # Redux slices
+│   │   │   ├── pages/         # Page components
+│   │   │   ├── store/         # Redux store
+│   │   │   ├── App.js         # Main app component
+│   │   │   └── index.js       # Entry point
+│   │   └── package.json
+│   ├── server/                # Express backend
+│   │   ├── models/           # MongoDB models
+│   │   ├── routes/           # API routes
+│   │   ├── middleware/       # Custom middleware
+│   │   ├── uploads/          # File uploads
+│   │   ├── index.js          # Server entry point
+│   │   └── package.json
+│   ├── config.env            # Environment variables
+│   └── package.json          # Root package.json
+└── README.md
 ```
 
-## Configuration
+## API Endpoints
 
-The `config.env` file contains all environment variables:
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
 
-- `MONGODB_URI`: Database connection string
-- `JWT_SECRET`: Secret for JWT token signing
-- `CLOUDINARY_*`: Cloudinary credentials for image uploads
-- `PORT`: Backend server port
-- `FRONTEND_URL`: Frontend URL for CORS
-- `API_BASE_URL`: Backend API URL
+### Photos
+- `GET /api/photos` - Get all photos (excluding user's guesses)
+- `POST /api/photos` - Upload a new photo
+- `GET /api/photos/my-photos` - Get user's uploaded photos
+
+### Guesses
+- `POST /api/guesses` - Submit a guess
+- `GET /api/guesses/my-guesses` - Get user's guesses
+
+### Users
+- `GET /api/users/leaderboard` - Get leaderboard
+- `PUT /api/users/profile` - Update user profile
+- `GET /api/users/stats` - Get user statistics
+
+## Scoring System
+
+- **Easy photos**: 5 base points
+- **Medium photos**: 10 base points  
+- **Hard photos**: 15 base points
+- **Time bonus**: Up to 5 additional points for quick guesses
+- **Photo uploads**: Earn points when others guess your photos correctly
+
+## Features in Detail
+
+### Photo Upload
+- Drag and drop interface
+- Multiple difficulty levels
+- Automatic point assignment
+- Image preview
+
+### Location Guessing
+- Real-time timer
+- Case-insensitive matching
+- Immediate feedback
+- Skip functionality
+
+### Leaderboard
+- Time-based filtering (All time, Week, Month)
+- User statistics
+- Ranking system with medals
+
+### User Profiles
+- Editable profile information
+- Personal statistics
+- Activity tracking
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
-MIT 
+
+This project is licensed under the ISC License.
+
+## Support
+
+For support, please open an issue in the GitHub repository. 
